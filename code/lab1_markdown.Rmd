@@ -1,16 +1,22 @@
-# plotting time series data from HMP
-# jan 26th, 2021
-# ATMS 748
-# by: Jack Tarricone
+---
+title: "Lab 1 ATMS 748"
+author: "Jack Tarricone"
+date: "2/8/2022"
+output: pdf_document
+---
 
-#install.packages("ggplot2","dplyr","lubridate","chron")
-library(ggplot2) # for plotting
-library(dplyr) # for data manipulation
-library(lubridate) # for dates and times
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2) 
+library(dplyr) 
+library(lubridate) 
 library(chron)
+```
 
+
+```{r}
 # read in csv and make room for colnames
-hmp_csv_data <-read.csv("/Users/jacktarricone/atms_748/data-code/hmp/CSV_21490.SlowResponse_2022_01_18_1732.dat",
+hmp_csv_data <-read.csv("/Users/jacktarricone/atms_748/data-code/hmp_data/CSV_21490.SlowResponse_2022_01_18_1732.dat",
                         header = FALSE)
 head(hmp_csv_data) # check
 
@@ -40,27 +46,17 @@ hmp_csv_data$time <-times(gsub("(..)(..)", "\\1:\\2:00", time))
 
 # combine into one date and time columb using lubridate
 hmp_csv_data$date_time <- ymd_hms(paste(hmp_csv_data$date, hmp_csv_data$time))
+head(hmp_csv_data)
 
 # test plot using obs number before date/time formatting
 theme_set(theme_light(11)) # set theme for plotting
 
+```
 
-# air temp
-ggplot(hmp_csv_data) +
-  geom_line(aes(x = date_time, y = AirTC_Avg))
+## Temperature
 
-# RH
-ggplot(hmp_csv_data) +
-  geom_line(aes(x = date_time, y = RH))
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
 
-# ptemp
-ggplot(hmp_csv_data) +
-  geom_line(aes(x = date_time, y = PTemp_C))
-
-# test by filter for first 2000 obs
-hmp_filt <-filter(hmp_csv_data, obs <=2000)
-
-# RH filt
-ggplot(hmp_filt) +
-  geom_line(aes(x = date_time, y = RH))
-            
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
