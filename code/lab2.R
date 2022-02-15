@@ -1,9 +1,13 @@
-# plotting time series data from HMP
-# jan 26th, 2021
-# ATMS 748
-# by: Jack Tarricone
+# lab 2
 
-#install.packages("ggplot2","dplyr","lubridate","chron")
+### HMP temperature plot
+# 1. add +/- standard deviation shaded area
+# 2. ensamable average of all 5 groups
+# 3. line with our data
+
+### HMP RH PLOT
+# same thing as first plot
+
 library(ggplot2) # for plotting
 library(dplyr) # for data manipulation
 library(lubridate) # for dates and times
@@ -18,17 +22,15 @@ head(hmp_csv_data) # check
 hmp_ascii_data <-read.table("/Users/jacktarricone/atms_748/lab2_data/Group_3/TOA5_21490.SlowResponse_0.dat")
 
 # rename columns using information in the ascii header
-colnames(hmp_csv_data) <- c("year","day","hour_min","sec","BattV_Min","PTemp_C","RH","AirTC_Avg")
+colnames(hmp_csv_data) <- c("year","day","hour_min","sec","BattV_Min",
+                            "PTemp_C","RH","AirTC_Avg","windSpeed","windDirection","gustWindSpeed","AirTemp")
+hmp_csv_data$day <-hmp_csv_data$day -31
 head(hmp_csv_data) # check, looks good
 tail(hmp_csv_data)
 
-# add in observations column
-obs <-seq(1,9921,1)
-hmp_csv_data <-cbind(hmp_csv_data,obs) #bind to data frame
-
 # add in month column
-month <-rep(2,9921) # only 2 because it's all in feb
-hmp_csv_data <-cbind(month, hmp_csv_data) # bind
+month <-rep(2,nrow(hmp_csv_data)) # only 2 because it's all in feb
+hmp_csv_data <-cbind(hmp_csv_data, month) # bind
 
 # create date col
 date <-mdy(paste0(hmp_csv_data$month,"-",hmp_csv_data$day,"-",hmp_csv_data$year))
@@ -42,25 +44,5 @@ hmp_csv_data$time <-times(gsub("(..)(..)", "\\1:\\2:00", time))
 hmp_csv_data$date_time <- ymd_hms(paste(hmp_csv_data$date, hmp_csv_data$time))
 head(hmp_csv_data)
 
-# test plot using obs number before date/time formatting
-theme_set(theme_light(11)) # set theme for plotting
-
-# air temp
-ggplot(hmp_csv_data) +
-  geom_line(aes(x = date_time, y = AirTC_Avg)) +
-  
-# RH
 ggplot(hmp_csv_data) +
   geom_line(aes(x = date_time, y = RH))
-
-# ptemp
-ggplot(hmp_csv_data) +
-  geom_line(aes(x = date_time, y = PTemp_C))
-
-# test by filter for first 2000 obs
-hmp_filt <-filter(hmp_csv_data, obs <=2000)
-
-# RH filt
-ggplot(hmp_filt) +
-  geom_line(aes(x = date_time, y = RH))
-            
