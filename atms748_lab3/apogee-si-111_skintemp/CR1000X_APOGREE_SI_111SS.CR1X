@@ -1,0 +1,83 @@
+'jack tarricone
+'feb 8th, 2022
+
+'program for apogee si-111 radiometer on a CR1000X logger
+'Created by Short Cut (4.4)
+
+''''''''''''''''''''
+''''' WIRING '''''''
+''''''''''''''''''''
+
+'1H           green
+'2H           white
+'2L           black
+'ground       clear, blue
+'VX1          red
+
+'Declare Variables and Units
+
+Const mC2_1 = 103911       ' unique
+Const mC1_1 = 9199650       ' unique
+Const mC0_1 = 1537640000    ' unique
+Const bC2_1 = 3664.35       ' unique
+Const bC1_1 = 28024.3        ' unique
+Const bC0_1 = -13072500      ' unique
+
+Dim TT_K
+Dim SBT_K
+Dim m
+Dim b
+
+Public BattV
+Public PTemp_C
+Public TT_C
+Public SBT_C
+Public TTmV
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units TT_C=Deg C
+Units SBT_C=Deg C
+
+'Define Data Tables
+DataTable(SlowResponse,True,-1)
+	DataInterval(0,60,Sec,10)
+	CardOut(0,-1)
+	Average(1,TT_C,FP2,False)
+	Average(1,SBT_C,FP2,False)
+	Minimum(1,BattV,FP2,False,False)
+	Sample(1,PTemp_C,FP2)
+EndTable
+
+DataTable(Table2,True,-1)
+	DataInterval(0,1440,Min,10)
+	Minimum(1,BattV,FP2,False,False)
+EndTable
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(20,Sec,1,0)
+		'Default CR1000X Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR1000X Datalogger Wiring Panel Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		'SI-111SS Precision Infrared Radiometer measurements 'TT_C' and 'SBT_C'
+		'Measure SI-111SS sensor body thermistor temperature
+		Therm109(SBT_C,1,1,VX1,0,60,1,0)
+		'Measure SI-111SS output of thermopile
+		VoltDiff(TTmV,1,mV200,2,True,0,60,1,0)
+		'Calculate slope (m) and offset (b) coefficients for target temperature calculation
+		m=mC0_1+(mC1_1*SBT_C)+(mC2_1*SBT_C^2)
+		b=bC0_1+(bC1_1*SBT_C)+(bC2_1*SBT_C^2)
+		'Calculate target temperature using calculated slope (m) and offset (b)
+		SBT_K=SBT_C+273.15
+		TT_K=SBT_K^4+TTmV*m+b
+		TT_K=SQR(SQR(TT_K))
+		'Convert target temperature into desired units
+		TT_C=TT_K-273.15
+		'Call Data Tables and Store Data
+		CallTable SlowResponse
+		CallTable Table2
+	NextScan
+EndProg

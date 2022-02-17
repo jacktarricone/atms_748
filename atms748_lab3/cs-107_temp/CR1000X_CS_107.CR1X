@@ -1,0 +1,48 @@
+'jack tarricone
+'feb 8th, 2022
+
+'code for using a campbells scientific 107 temperature sensor
+'on a CR1000X data logger
+'Created by Short Cut (4.4)
+
+''''''''''''''''''''
+''''' WIRING '''''''
+''''''''''''''''''''
+
+'1H           red
+'ground       purple, clear
+'VX1          black
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public T107_C
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units T107_C=Deg C
+
+'Define Data Tables
+DataTable(SlowResponse,True,-1)
+	DataInterval(0,60,Sec,10)
+	CardOut(0,-1)
+	Minimum(1,BattV,FP2,False,False)
+	Sample(1,PTemp_C,FP2)
+	Average(1,T107_C,FP2,False)
+EndTable
+
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(20,Sec,1,0)
+		'Default CR1000X Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR1000X Datalogger Wiring Panel Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		'107 Temperature Probe measurement 'T107_C'
+		Therm107(T107_C,1,1,VX1,0,60,1,0)
+		'Call Data Tables and Store Data
+		CallTable SlowResponse
+	NextScan
+EndProg

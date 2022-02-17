@@ -1,0 +1,56 @@
+'jack tarricone
+'feb 15, 2022
+
+'code for cs100 (setra-278) barometric pressure sensor on a CR1000X Series
+'Created by Short Cut (4.4)
+
+''''''''''''''''''''
+''''' WIRING '''''''
+''''''''''''''''''''
+
+'1L           blue
+'12V          red
+'C2           green
+'G            black
+'ground       clear, yellow
+
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public BP_mbar
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units BP_mbar=mbar
+
+'Define Data Tables
+DataTable(SlowReponse,True,-1)
+	DataInterval(0,60,Sec,10)
+	CardOut(0,-1)
+	Minimum(1,BattV,FP2,False,False)
+	Average(1,PTemp_C,FP2,False)
+	Average(1,BP_mbar,IEEE4,False)
+EndTable
+
+DataTable(Table2,True,-1)
+	DataInterval(0,1440,Min,10)
+	Minimum(1,BattV,FP2,False,False)
+EndTable
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(5,Sec,1,0)
+		'Default CR1000X Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR1000X Datalogger Wiring Panel Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		'CS100 Barometric Pressure Sensor measurement 'BP_mbar'
+		PortSet(C1,1)
+		VoltSE(BP_mbar,1,mV5000,1,True,0,60,0.2,600)
+		'Call Data Tables and Store Data
+		CallTable SlowReponse
+		CallTable Table2
+	NextScan
+EndProg

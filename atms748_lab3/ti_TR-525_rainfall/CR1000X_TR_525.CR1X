@@ -1,0 +1,46 @@
+'jack tarricone
+'feb 8th, 2022
+
+'program for texas instruments tr-525 tipping bucket rain gauge on CR1000X logger
+'Created by Short Cut (4.4)
+
+'''''''''''''''''''
+''''  Wiring ''''''
+'''''''''''''''''''
+
+'ground       clear, white
+'P1           black  
+
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public Rain_mm
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units Rain_mm=mm
+
+'Define Data Tables
+DataTable(SlowResponse,True,-1)
+	DataInterval(0,60,Sec,10)
+	CardOut(0,-1)
+	Minimum(1,BattV,FP2,False,False)
+	Sample(1,PTemp_C,FP2)
+	Totalize(1,Rain_mm,FP2,False)
+EndTable
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(20,Sec,1,0)
+		'Default CR1000X Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR1000X Datalogger Wiring Panel Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		'TE525MM/TE525M Rain Gauge measurement 'Rain_mm'
+		PulseCount(Rain_mm,1,P1,1,0,0.1,0)
+		'Call Data Tables and Store Data
+		CallTable SlowResponse
+	NextScan
+EndProg

@@ -1,0 +1,45 @@
+'Date: January 19, 2020
+'Program author: Steve Drake
+'Example using VoltDiff() to acquire HMP-155A Thermohygrometer
+'---------------WIRING-----------------------------
+'˜Differential Input
+
+  '1H        yellow (Temperature)
+  '1L        Jumper to 2L
+
+  '2H        blue (RH)
+  '2L        white (reference)
+  'AG        clear (shield)
+
+  '12V       red (power)
+  'PG        black (power ground)
+'---------------USER CHANGABLE INPUTS-----------------
+Public AirTC, RH
+Units AirTC = Deg C
+Units RH = %
+
+'---------------------DATA TABLES-----------------------
+
+DataTable(SlowResponse,true,-1)
+  TableFile("CRD:"&Status.SerialNumber(1,1)&".SlowResponse_", 64, -1, 0, 1, hr, 0, 0)
+  Sample(1,AirTC,IEEE4)
+  Sample(1,RH,IEEE4)
+EndTable
+
+'---------------------MAIN PROGRAM-----------------------
+
+BeginProg
+  
+  Scan (1,Sec,10,0)	  
+    'Air Temperature
+    'VoltDiff(AirTC,1,mV2500,1, True, 0, 250, 0.14, -80) 'CR1000
+    VoltDiff(AirTC,1,mV1000,1, True, 0, 250, 0.14, -80) 'CR3000, CR1000X
+
+    'Relative Humidity
+    'VoltDiff(RH,1,mV2500,2, True, 0, 250, 0.1, 0) 'CR1000
+    VoltDiff(RH,1,mV1000,2, True, 0, 250, 0.1, 0) 'CR3000, CR1000X
+    If RH>100 AND RH<108 Then RH=100
+
+    CallTable SlowResponse
+  NextScan
+EndProg

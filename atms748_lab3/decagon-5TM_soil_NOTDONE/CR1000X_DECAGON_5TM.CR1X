@@ -1,0 +1,37 @@
+'jack tarricone
+'feb 15th, 2022
+
+'program for decagon 5TM soil moisture sensor on a CR1000X logger
+'Created by Short Cut (4.4)
+
+''''''''''''''''''''
+''''' WIRING '''''''
+''''''''''''''''''''
+
+'C3               red
+'12V              white
+'analog ground    bare
+
+'Declare Variables and Units
+Const num_5TM = 1
+
+Public D(num_5TM,3)
+Public soil_T(num_5TM)
+Public VWC(num_5TM)
+Public Eb
+
+Units soil_T=Dec_C
+Units VWC=m^3/m^3
+
+Const SDI_ADDR = 2
+Dim i
+
+'Define Data Tables
+DataTable(SlowResponse,True,-1)
+	DataInterval(0,1,Min,10)
+	CardOut(0,-1)
+	Minimum(1,BattV,FP2,False,False)
+	Sample(1,PTemp_C,FP2)
+	Sample(1,RH,FP2)
+	Average(1,AirTC,FP2,False)
+EndTable

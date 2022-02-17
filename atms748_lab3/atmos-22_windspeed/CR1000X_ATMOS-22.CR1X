@@ -1,0 +1,95 @@
+'jack tarricone
+'feb 22,  2022
+
+
+'code for running atmos-22 2d sonic anemometer on a CR1000X Series
+'Created by Short Cut (4.4)
+
+''''''''''''''''''''
+''''' WIRING '''''''
+''''''''''''''''''''
+
+'12V           red
+'C3            green
+'G             clear,black
+
+'Declare Variables and Units
+Public BattV
+Public PTemp_C
+Public WSData(3)
+Public N(8)
+
+Alias WSData(1)=WindDir
+Alias WSData(2)=WS_ms
+Alias WSData(3)=WSDiag
+Alias N(1)=SmplsF
+Alias N(2)=Diag1F
+Alias N(3)=Diag2F
+Alias N(4)=Diag4F
+Alias N(5)=Diag8F
+Alias N(6)=Diag9F
+Alias N(7)=Diag10F
+Alias N(8)=NNDF
+
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units WindDir=degrees
+Units WS_ms=meters/second
+Units WSDiag=unitless
+
+'Define Data Tables
+DataTable(SlowReponse,True,-1)
+	DataInterval(0,60,Sec,10)
+	CardOut(0,-1)
+	Minimum(1,BattV,FP2,False,False)
+	Average(1,PTemp_C,FP2,False)
+	Sample(1,WindDir,FP2)
+	Average(1,WS_ms,FP2,False)
+	Sample(1,WSDiag,FP2)
+	Sample(1,SmplsF,FP2)
+EndTable
+
+DataTable(Table2,True,-1)
+	DataInterval(0,1440,Min,10)
+	Minimum(1,BattV,FP2,False,False)
+EndTable
+
+'Main Program
+BeginProg
+	'Main Scan
+	Scan(5,Sec,1,0)
+		'Default CR1000X Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'Default CR1000X Datalogger Wiring Panel Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		'WindSonic4 Two Dimensional Sonic Wind Speed & Direction Sensor measurements 'WindDir', 'WS_ms', and 'WSDiag'
+		'Get data from WindSonic4
+		SDI12Recorder(WindDir,C1,"0","R0!",1,0)
+		If WindDir=NAN Then
+			Move(WS_ms,2,WindDir,1)
+		EndIf
+		'Set diagnostic variables as needed
+		Move(SmplsF,8,0,1)
+		Select Case WSDiag
+			Case=0
+				SmplsF=1
+			Case=1
+				Diag1F=1
+			Case=2
+				Diag2F=1
+			Case=4
+				Diag4F=1
+			Case=8
+				Diag8F=1
+			Case=9
+				Diag9F=1
+			Case=10
+				Diag10F=1
+			Else
+				NNDF=1
+		EndSelect
+		'Call Data Tables and Store Data
+		CallTable SlowReponse
+		CallTable Table2
+	NextScan
+EndProg
