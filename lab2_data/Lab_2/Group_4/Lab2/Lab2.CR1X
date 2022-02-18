@@ -1,0 +1,79 @@
+'CR1000X Series
+'Created by Short Cut (4.4). Krishangi Groover, Braeden Winters
+
+'---------WIRING-----------
+
+'Thermohygrometer Wiring
+  'Yellow          1H (Temperature)
+  'Jumper to 2L    1L
+   
+  'Blue            2H (RH)
+  'White           2L (Reference)
+  'Clear           AG (Shield)
+   
+  'Red             12V (Power)
+  'Black           PG (Power Ground)
+  
+'Sonic Anemometer Wiring
+  'Orange          C1
+  'Brown          12V
+  'Bare           PG
+
+'Declare Variables and Units
+'HMP155
+Public AirTC
+Public RH
+
+Units AirTC = Deg C
+Units RH = %
+
+'Meter ATMOS22
+Public ATMOS22(4)
+'M!+D0! command variables
+Alias ATMOS22(1) = windSpeed
+Units windSpeed = m/s
+Alias ATMOS22(2) = windDirection
+Units windDirection = deg
+Alias ATMOS22(3) = gustWindSpeed
+Units gustWindSpeed = m/s
+
+'M!+D1! command variables
+Alias ATMOS22(4) = AirTemp
+Units AirTemp = degC
+
+Const TABLE_NAME="SlowResponse"
+
+'Define Data Tables
+DataTable(TABLE_NAME,1,-1)
+	DataInterval(0,1,Min,10)
+  TableFile("CRD:"&Status.SerialNumber(1,1)&".SlowResponse_", 64, -1, 0, 1, hr, 0, 0)
+  
+  'HMP155
+	Sample(1,AirTC,IEEE4)
+	Sample(1,RH,IEEE4)
+	'ATMOS22
+	Sample(1,windSpeed,IEEE4)
+	Sample(1,windDirection,IEEE4)
+	Sample(1,gustWindSpeed,IEEE4)
+	Sample(1,AirTemp,IEEE4)
+EndTable
+
+'Main Program
+BeginProg
+  
+	Scan(1,Sec,10,0)
+		'Air Temperature'
+		'VoltDiff(AirTC,1,mV1000,1, True, 0, 250, 0.14, -80) 'CR1000
+		VoltDiff(AirTC,1,mV1000,1, True, 0, 250, 0.14, -80) 'CR3000, CR1000X
+		
+		'Relative Humidity
+		'VoltDiff(RH,1,mV1000,2, True, 0, 250, 0.1, 0) 'CR1000
+		VoltDiff(RH,1,mV1000,2, True, 0, 250, 0.1, 0) 'CR3000, CR1000X
+		If RH>100 AND RH<108 Then RH=100
+		
+    'ATMOS22
+    SDI12Recorder (ATMOS22(),C1,0,"M!",1.0,0)
+
+		CallTable SlowResponse
+	NextScan
+EndProg
