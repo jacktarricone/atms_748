@@ -13,6 +13,20 @@ library(dplyr) # for data manipulation
 library(lubridate) # for dates and times
 library(chron)
 
+# •Acquire data with your program on data card
+# •Copy data table to your PC in CSV format (Loggernet: <Data><CardConvert>)
+# •Copy your CSV data to UNR Box
+# •Copy other lab teams’ CSV data files from Box
+# •Write a program to read the data and make time series plots
+# •Turn in plot of timeseries of your  HMP-155 temperature measurements and ensemble-averaged temperature measurements with standard deviation (error bars or patch)
+# •Turn in plot of timeseries of your HMP-155 relative humidity measurements and ensemble-averaged relative humidity measurements with standard deviation (error bars or patch)
+# •Turn in windrose plot of your wind measurements (wind speed and direction)
+# •Turn in electronic copy of program
+
+#############################
+##### our data (group 3) ####
+#############################
+
 # read in csv and make room for colnames
 hmp_csv_data <-read.csv("/Users/jacktarricone/atms_748/lab2_data/Group_3/CSV_21490.SlowResponse_0_1.dat",
                         header = FALSE)
@@ -44,5 +58,16 @@ hmp_csv_data$time <-times(gsub("(..)(..)", "\\1:\\2:00", time))
 hmp_csv_data$date_time <- ymd_hms(paste(hmp_csv_data$date, hmp_csv_data$time))
 head(hmp_csv_data)
 
+# filter off bad begining data
+hmp_csv_data <-filter(hmp_csv_data, date_time  >= "2022-02-01 18:50:00") 
+# write.csv(hmp_csv_data, "/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/jack_eric.csv")
+
+# quick test plot
+theme_set(theme_classic(12))
 ggplot(hmp_csv_data) +
-  geom_line(aes(x = date_time, y = RH))
+  geom_line(aes(x = date_time, y = PTemp_C), size =.6) + 
+  geom_line(aes(x = date_time, y = AirTC_Avg), size =.6, color = "red")
+
+##########################
+######## group 1 #########
+##########################
