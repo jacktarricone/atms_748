@@ -1,0 +1,136 @@
+---
+title: "Lab 2 ATMS 748"
+author: "Jack Tarricone"
+date: "2/21/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2) 
+library(dplyr) 
+library(lubridate) 
+library(chron)
+```
+# Directions
+•Acquire data with your program on data card\
+•Copy data table to your PC in CSV format (Loggernet: <Data><CardConvert>)\
+•Copy your CSV data to UNR Box\
+•Copy other lab teams’ CSV data files from Box\
+•Write a program to read the data and make time series plots\
+•Turn in plot of timeseries of your  HMP-155 temperature measurements and ensemble-averaged temperature measurements with standard deviation (error bars or patch)\
+•Turn in plot of timeseries of your HMP-155 relative humidity measurements and ensemble-averaged relative humidity measurements with standard deviation (error bars or patch)\
+•Turn in windrose plot of your wind measurements (wind speed and direction)
+•Turn in electronic copy of program\
+
+
+# Read in CSV files
+This doesn't include our group's data because it was collected the week after.
+
+```{r}
+# read in csv and make room for colnames
+g1 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g1.csv")
+g2 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g2.csv")
+g4 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g4.csv")
+g5 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g5.csv")
+```
+
+### Transform dates back into R dates
+```{r}
+# read in csv and make room for colnames
+g1$date_time <-ymd_hms(g1$date_time)
+g2$date_time <-ymd_hms(g2$date_time)
+g4$date_time <-ymd_hms(g4$date_time)
+g5$date_time <-ymd_hms(g5$date_time)
+```
+
+```{r}
+# read in csv and make room for colnames
+head(g1)
+```
+
+```{r}
+# trim each df down so it has the same date_time range
+g1_filt <-filter(g1, date_time >= ymd_hms("2022-01-25 17:45:00") & date_time <= ymd_hms("2022-02-01 15:45:00"))
+g2_filt <-filter(g2, date_time >= ymd_hms("2022-01-25 17:45:00") & date_time <= ymd_hms("2022-02-01 15:45:00"))
+g4_filt <-filter(g4, date_time >= ymd_hms("2022-01-25 17:45:00") & date_time <=ymd_hms("2022-02-01 15:45:00"))
+g5_filt <-filter(g5, date_time >= ymd_hms("2022-01-25 17:45:00") & date_time <=ymd_hms("2022-02-01 15:45:00"))
+```
+
+```{r}
+# tail
+head(g2_filt)
+```
+```{r}
+# create new df with RH for all 4 groups
+
+rh_df <-as.data.frame(cbind(g1_filt$RH, g2_filt$RH, g4_filt$RH, g5_filt$RH))
+date_time <-ymd_hms(g1_filt$date_time)
+rh <-cbind(dt, rh_df)
+colnames(rh) <-c("date_time","g1_RH", "g2_RH","g4_RH","g5_RH")
+head(rh)
+
+# create mean col
+rh$mean <-(rh$g1_RH+rh$g2_RH+rh$g4_RH+rh$g5_RH)/4
+
+# create sd col
+rh$sd <-sd(rh$mean)
+
+```
+
+# RH
+```{r}
+#theme_set(theme_classic(12)) # set theme for plotting
+ggplot(rh) +
+  #geom_line(aes(x = date_time, y = g1_RH, col = "red")) +
+  #geom_line(aes(x = date_time, y = g2_RH, col = "green")) +
+  #geom_line(aes(x = date_time, y = g4_RH, col = "blue")) +
+  #geom_line(aes(x = date_time, y = g5_RH, col = "goldenrod")) +
+  geom_line(aes(x = date_time, y = mean), col = "black") +
+  geom_ribbon(aes(x = date_time, ymin = mean-sd, ymax = mean+sd, fill = "+/- One Standard Deviation"), alpha=.3)+
+  scale_fill_manual("",values="grey12") +
+  # geom_line(data = wy2021_df %>% # plot mean within imbedded dplyr functions
+  #             group_by(date_time) %>%
+  #             dplyr::summarize(swe_mean_in = mean(swe_in, na.rm=TRUE)), 
+  #           mapping = aes(y = swe_mean_in, x = date, color = "WY2021 Mean"), size = .9)
+  labs(title = "HMP RH Ensemble Average Jan 25th - Feb 2nd 2022") +
+  ylab("RH (%)") +
+  xlab("Date") +
+    theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        legend.position = c(.85,.9),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 9, face = "bold"),
+        legend.margin = margin(t=0, unit='cm'),
+        legend.key = element_rect(size = .2))
+```
+\
+\
+\
+\
+
+# Air Temperature 
+```{r}
+theme_set(theme_classic(12)) # set theme for plotting
+ggplot() +
+  geom_line(aes(x = g1$date_time, y = g1$AirTC_Avg, col = "red")) +
+  geom_line(aes(x = g2$date_time, y = g2$AirTC_Avg, col = "green")) +
+  geom_line(aes(x = g4$date_time, y = g4$AirTC, col = "black")) +
+  geom_line(aes(x = g5$date_time, y = g5$AirTC_Avg, col = "goldenrod")) +
+  labs(title = "HMP Air Temperature Time Series Jan 25th - Feb 2nd 2022") +
+  ylab("Temp (C)") +
+  xlab("Date")
+
+ggplot() +
+  geom_line(aes(x = g1$date_time, y = g1$AirTemp, col = "red")) +
+  geom_line(aes(x = g2$date_time, y = g2$AirTemp, col = "green")) +
+  geom_line(aes(x = g4$date_time, y = g4$AirTemp, col = "black")) +
+  geom_line(aes(x = g5$date_time, y = g5$AirTemp, col = "goldenrod")) +
+  labs(title = "Sonic Air Temperature Time Series Jan 25th - Feb 2nd 2022") +
+  ylab("Temp (C)") +
+  xlab("Date")
+```
+```

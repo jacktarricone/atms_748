@@ -1,4 +1,4 @@
-"","year","day","hour_min","sec","AirTC","RH","windSpeed","windDirection","gustWindSpeed","AirTemp","month","new_day","date","time","date_time"
+"","year","day","hour_min","sec","AirTC_Avg","RH","windSpeed","windDirection","gustWindSpeed","AirTemp","month","new_day","date","time","date_time"
 "1",2022,25,1652,0,22.2732,38.87006,0.02,160.8,0.02,22.4,1,25,2022-01-25,16:52:00,2022-01-25 16:52:00
 "2",2022,25,1653,0,22.26272,38.81315,0.04,146.1,0.04,22.4,1,25,2022-01-25,16:53:00,2022-01-25 16:53:00
 "3",2022,25,1654,0,22.24461,38.92723,0.02,159.5,0.02,22.4,1,25,2022-01-25,16:54:00,2022-01-25 16:54:00
