@@ -1,27 +1,14 @@
-# lab 2
+# jack tarricone
+# atms 748 lab 2
+# script for formatting all 5 groups time series data for plotting
+# plots will be attached in a markdown
 
-### HMP temperature plot
-# 1. add +/- standard deviation shaded area
-# 2. ensamable average of all 5 groups
-# 3. line with our data
-
-### HMP RH PLOT
-# same thing as first plot
 
 library(ggplot2) # for plotting
 library(dplyr) # for data manipulation
 library(lubridate) # for dates and times
 library(chron)
 
-# •Acquire data with your program on data card
-# •Copy data table to your PC in CSV format (Loggernet: <Data><CardConvert>)
-# •Copy your CSV data to UNR Box
-# •Copy other lab teams’ CSV data files from Box
-# •Write a program to read the data and make time series plots
-# •Turn in plot of timeseries of your  HMP-155 temperature measurements and ensemble-averaged temperature measurements with standard deviation (error bars or patch)
-# •Turn in plot of timeseries of your HMP-155 relative humidity measurements and ensemble-averaged relative humidity measurements with standard deviation (error bars or patch)
-# •Turn in windrose plot of your wind measurements (wind speed and direction)
-# •Turn in electronic copy of program
 
 #############################
 ##### our data (group 3) ####
@@ -142,8 +129,6 @@ write.csv(g1, "/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g1.cs
 
 
 
-
-
 ##########################
 ######## group 2 #########
 ##########################
@@ -203,7 +188,7 @@ g2$date_time <- ymd_hms(paste(g2$date, g2$time))
 head(g2)
 
 # filter off bad data in beginning
-g2 <-filter(g2, date_time  >= "2022-01-25 17:05:00") 
+# g2 <-filter(g2, date_time  >= "2022-01-25 17:05:00") 
 
 ggplot(g2) +
   geom_line(aes(x = date_time, y = RH), size =.6)
@@ -211,6 +196,7 @@ ggplot(g2) +
 
 # write.csv(g2, "/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g2.csv")
 
+tail(g5)
 
 
 ##########################
@@ -230,7 +216,7 @@ g4 <- g4[-c(1)]
 head(g4)
 
 # rename columns using information in the ascii header from g4
-colnames(g4) <- c("year","day","hour_min","sec","AirTC",
+colnames(g4) <- c("year","day","hour_min","sec","AirTC_Avg",
                   "RH","windSpeed","windDirection","gustWindSpeed","AirTemp")
 head(g4)
 
@@ -279,8 +265,8 @@ head(g4)
 ggplot(g4) +
   geom_line(aes(x = date_time, y = RH), size =.6)
 
-#write.csv(g4, "/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g4.csv")
-
+# write.csv(g4, "/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g4.csv")
+?geom_ribbon
 ##########################
 ######## group 5 #########
 ##########################
