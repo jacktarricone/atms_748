@@ -29,25 +29,23 @@ library(openair)
 This doesn't include our group's data because it was collected the week after.
 
 ```{r}
-# read in csv and make room for colnames
+# read in csvs created in last script
 g1 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g1.csv")
 g2 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g2.csv")
 g4 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g4.csv")
 g5 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g5.csv")
 ```
 
-### Transform dates back into R dates
 ```{r}
-# read in csv and make room for colnames
+# transform date_time back into a R date
 g1$date_time <-ymd_hms(g1$date_time)
 g2$date_time <-ymd_hms(g2$date_time)
 g4$date_time <-ymd_hms(g4$date_time)
 g5$date_time <-ymd_hms(g5$date_time)
 ```
 
-
 ```{r}
-# trim each df down so it has the same date_time range
+# trim each df down so it has the same date_time range, cutting off the back data in the start
 g1_filt <-filter(g1, date_time >= ymd_hms("2022-01-25 17:45:00") & date_time <= ymd_hms("2022-02-01 15:45:00"))
 g2_filt <-filter(g2, date_time >= ymd_hms("2022-01-25 17:45:00") & date_time <= ymd_hms("2022-02-01 15:45:00"))
 g4_filt <-filter(g4, date_time >= ymd_hms("2022-01-25 17:45:00") & date_time <=ymd_hms("2022-02-01 15:45:00"))
@@ -56,29 +54,29 @@ g5_filt <-filter(g5, date_time >= ymd_hms("2022-01-25 17:45:00") & date_time <=y
 
 # RH
 ```{r}
-# create new df with RH for all 4 groups
-rh_df <-cbind(g1_filt$RH, g2_filt$RH, g4_filt$RH, g5_filt$RH)
-rh_df <-as.data.frame(rh_df)
-date_time <-ymd_hms(g1_filt$date_time)
-rh <-cbind(date_time, rh_df)
+## create new df with RH for all 4 groups
+# bind all the groups RH values together
+rh_df <-cbind(g1_filt$RH, g2_filt$RH, g4_filt$RH, g5_filt$RH) 
+rh_df <-as.data.frame(rh_df) # convert to df
+date_time <-ymd_hms(g1_filt$date_time) # convert date again
+rh <-cbind(date_time, rh_df) # bind date col
 colnames(rh) <-c("date_time","g1_RH", "g2_RH","g4_RH","g5_RH")
 
-# create mean col
+# create mean col for plot
 rh$mean <-(rh$g1_RH+rh$g2_RH+rh$g4_RH+rh$g5_RH)/4
 
-# create sd col
+# create sd col for plot
 rh$sd <-sd(rh$mean)
 
 ```
 
-Didn't include our data becasue it was from the week after.
 ```{r}
 #theme_set(theme_classic(12)) # set theme for plotting
 ggplot(rh) +
-  #geom_line(aes(x = date_time, y = g1_RH, col = "red")) +
-  #geom_line(aes(x = date_time, y = g2_RH, col = "green")) +
-  #geom_line(aes(x = date_time, y = g4_RH, col = "blue")) +
-  #geom_line(aes(x = date_time, y = g5_RH, col = "goldenrod")) +
+  # geom_line(aes(x = date_time, y = g1_RH, col = "red")) +
+  # geom_line(aes(x = date_time, y = g2_RH, col = "green")) +
+  # geom_line(aes(x = date_time, y = g4_RH, col = "blue")) +
+  # geom_line(aes(x = date_time, y = g5_RH, col = "goldenrod")) +
   geom_line(aes(x = date_time, y = mean), col = "black") +
   geom_ribbon(aes(x = date_time, ymin = mean-sd, ymax = mean+sd, fill = "+/- One Standard Deviation"), alpha=.2)+
   scale_fill_manual("",values="grey12") +
@@ -96,14 +94,10 @@ ggplot(rh) +
         legend.margin = margin(t=0, unit='cm'),
         legend.key = element_rect(size = .2))
 ```
-\
-\
-\
-\
+*Figure 1.* This plot displays the ensemble average relative humidity (RH) with plus and minus one standard deviation for Groups 1, 2, 4, and 5 between January 25th and February 2nd, 2022. Group 3 was omitted because the data contained significant errors and was not logged correctly. Group 1 & 2 also had errors in their data, with the RH values only unrealistically varying between 35-45%
 
 # Air Temperature 
 
-Again, did not include our data because of the time difference.
 ```{r}
 # create new df with air temp for all 4 groups
 at_df <-cbind(g1_filt$AirTC_Avg, g2_filt$AirTC_Avg, g4_filt$AirTC_Avg, g5_filt$AirTC_Avg)
