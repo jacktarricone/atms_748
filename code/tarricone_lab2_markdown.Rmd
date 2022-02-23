@@ -25,9 +25,7 @@ library(openair)
 •Turn in electronic copy of program\
 
 
-# Read in CSV files
-This doesn't include our group's data because it was collected the week after.
-
+# Data Formatting
 ```{r}
 # read in csvs created in last script
 g1 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/lab2_g1.csv")
@@ -46,13 +44,17 @@ g5$date_time <-ymd_hms(g5$date_time)
 
 ```{r}
 # trim each df down so it has the same date_time range, cutting off the back data in the start
-g1_filt <-filter(g1, date_time >= ymd_hms("2022-01-25 17:45:00") & date_time <= ymd_hms("2022-02-01 15:45:00"))
-g2_filt <-filter(g2, date_time >= ymd_hms("2022-01-25 17:45:00") & date_time <= ymd_hms("2022-02-01 15:45:00"))
-g4_filt <-filter(g4, date_time >= ymd_hms("2022-01-25 17:45:00") & date_time <=ymd_hms("2022-02-01 15:45:00"))
-g5_filt <-filter(g5, date_time >= ymd_hms("2022-01-25 17:45:00") & date_time <=ymd_hms("2022-02-01 15:45:00"))
+g1_filt <-filter(g1, date_time >= ymd_hms("2022-01-25 17:45:00") 
+                 & date_time <= ymd_hms("2022-02-01 15:45:00"))
+g2_filt <-filter(g2, date_time >= ymd_hms("2022-01-25 17:45:00") 
+                 & date_time <= ymd_hms("2022-02-01 15:45:00"))
+g4_filt <-filter(g4, date_time >= ymd_hms("2022-01-25 17:45:00") 
+                 & date_time <=ymd_hms("2022-02-01 15:45:00"))
+g5_filt <-filter(g5, date_time >= ymd_hms("2022-01-25 17:45:00") 
+                 & date_time <=ymd_hms("2022-02-01 15:45:00"))
 ```
 
-# RH
+# 1. RH
 ```{r}
 ## create new df with RH for all 4 groups
 # bind all the groups RH values together
@@ -71,16 +73,13 @@ rh$sd <-sd(rh$mean)
 ```
 
 ```{r}
-#theme_set(theme_classic(12)) # set theme for plotting
+# plot
+theme_set(theme_classic(12)) # set theme for plotting
 ggplot(rh) +
-  # geom_line(aes(x = date_time, y = g1_RH, col = "red")) +
-  # geom_line(aes(x = date_time, y = g2_RH, col = "green")) +
-  # geom_line(aes(x = date_time, y = g4_RH, col = "blue")) +
-  # geom_line(aes(x = date_time, y = g5_RH, col = "goldenrod")) +
   geom_line(aes(x = date_time, y = mean), col = "black") +
   geom_ribbon(aes(x = date_time, ymin = mean-sd, ymax = mean+sd, fill = "+/- One Standard Deviation"), alpha=.2)+
   scale_fill_manual("",values="grey12") +
-  labs(title = "HMP RH Ensemble Average Jan 25th - Feb 2nd 2022") +
+  labs(title = "HMP RH Ensemble Average Jan 25th - Feb 1st 2022") +
   ylab("RH (%)") +
   xlab("Date") +
     theme(axis.line = element_line(colour = "black"),
@@ -94,16 +93,17 @@ ggplot(rh) +
         legend.margin = margin(t=0, unit='cm'),
         legend.key = element_rect(size = .2))
 ```
-*Figure 1.* This plot displays the ensemble average relative humidity (RH) with plus and minus one standard deviation for Groups 1, 2, 4, and 5 between January 25th and February 2nd, 2022. Group 3 was omitted because the data contained significant errors and was not logged correctly. Group 1 & 2 also had errors in their data, with the RH values only unrealistically varying between 35-45%
+**Figure 1.** This plot displays the ensemble average relative humidity (RH) with plus and minus one standard deviation for Groups 1, 2, 4, and 5 between January 25th and February 2nd, 2022. Group 3 was omitted because the data contained significant errors and was not logged correctly. Group 1 & 2 also had errors in their data, with the RH values only unrealistically varying between 35-45%
 
-# Air Temperature 
+# 2. Air Temperature 
 
 ```{r}
 # create new df with air temp for all 4 groups
+# bind all the groups AT values together
 at_df <-cbind(g1_filt$AirTC_Avg, g2_filt$AirTC_Avg, g4_filt$AirTC_Avg, g5_filt$AirTC_Avg)
-at_df <-as.data.frame(at_df)
-date_time <-ymd_hms(g1_filt$date_time)
-at <-cbind(date_time, at_df)
+at_df <-as.data.frame(at_df) # convert to df
+date_time <-ymd_hms(g1_filt$date_time) # convert date
+at <-cbind(date_time, at_df) # bind date and data
 colnames(at) <-c("date_time","g1_at", "g2_at","g4_at","g5_at")
 
 # create mean col
@@ -114,15 +114,12 @@ at$sd <-sd(at$mean)
 ```
 
 ```{r}
+# plot
 ggplot(at) +
   geom_line(aes(x = date_time, y = mean), col = "red") +
-  # geom_line(aes(x = g1_filt$date_time, y = g1_filt$AirTC_Avg, col = "red")) +
-  # geom_line(aes(x = g2_filt$date_time, y = g2_filt$AirTC_Avg,col = "green")) +
-  # geom_line(aes(x = g4_filt$date_time, y = g4_filt$AirTC_Avg,col = "blue")) +
-  # geom_line(aes(x = g5_filt$date_time, y = g5_filt$AirTC_Avg, col = "goldenrod")) +
   geom_ribbon(aes(x = date_time, ymin = mean-sd, ymax = mean+sd, fill = "+/- One Standard Deviation"), alpha=.2)+
   scale_fill_manual("",values="grey12") +
-  labs(title = "HMP Air Temperature Ensemble Average Jan 25th - Feb 2nd 2022") +
+  labs(title = "HMP Air Temperature Ensemble Average Jan 25th - Feb 1st 2022") +
   ylab("Temperature (C)") +
   xlab("Date") +
     theme(axis.line = element_line(colour = "black"),
@@ -136,11 +133,12 @@ ggplot(at) +
         legend.margin = margin(t=0, unit='cm'),
         legend.key = element_rect(size = .2))
 ```
+**Figure 2.** This plot displays the ensemble average HMP air temperature with plus and minus one standard deviation for Groups 1, 2, 4, and 5 between January 25th and February 2nd, 2022. Similar to RH, Group 3's HMP data was omitted because it was not logged correctly. The variance temperature data was consistent when compared to the RH data.
 
-# Wind Rose
-Plotting our data (Group 3) from the 2D Sonic.
+
+# 3. Wind Rose
 ```{r}
-# read in our csv and make room for colnames
+# read in group 3 sonic data csv
 g3 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/jack_eric.csv")
 ```
 
@@ -148,11 +146,15 @@ g3 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/jack_eric.
 # format date
 g3$date <-ymd_hms(g3$date_time)
 
-# correct for magnetic north
-g3$windDirection <-g3$windDirection -2
+## correct offset of -2
+g3$windDirection <- g3$windDirection -2
+id <- which(g3$windDirection < 0)
+g3$windDirection[id] <- g3$windDirection[id] + 360
 ```
 
-```{r fig.height = 7, fig.width = 7, fig.align = "center"}
-windRose(g3, ws = "windSpeed", wd = "windDirection", angle = 10, ws.int = .3, 
-         cols = c("black", "blue", "green", "yellow"), width = 1.5, auto.text = FALSE, paddle = FALSE) 
+```{r fig.height = 6, fig.width = 6, fig.align = "center"}
+# plot using windRose function from openair package
+windRose(g3, ws = "windSpeed", wd = "windDirection", angle = 10, ws.int = .5, angle.scale = 45,
+         cols = c("yellow", "blue", "green", "black"), width = 1.5, auto.text = FALSE, paddle = FALSE) 
 ```
+**Figure 3.** This wind rose plot shows direction, speed, and frequency of wind events from a 2-D sonic anemometer from February 1st - 8th, 2022 in Reno, NV. The majority of wind speeds were below 1 m/s, while the most common wind directions were from the southeast and northwest.

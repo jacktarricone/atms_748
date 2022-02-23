@@ -20,11 +20,12 @@ hmp_csv_data <-read.csv("/Users/jacktarricone/atms_748/lab2_data/Group_3/CSV_214
 head(hmp_csv_data) # check
 
 # read in ascii for information provided in the header
-hmp_ascii_data <-read.table("/Users/jacktarricone/atms_748/lab2_data/Group_3/TOA5_21490.SlowResponse_0.dat")
+hmp_ascii_data <-readLines("/Users/jacktarricone/atms_748/lab2_data/Group_3/TOA5_21490.SlowResponse_0.dat")
 
 # rename columns using information in the ascii header
 colnames(hmp_csv_data) <- c("year","day","hour_min","sec","BattV_Min",
                             "PTemp_C","RH","AirTC_Avg","windSpeed","windDirection","gustWindSpeed","AirTemp")
+
 hmp_csv_data$day <-hmp_csv_data$day -31
 head(hmp_csv_data) # check, looks good
 tail(hmp_csv_data)
@@ -46,7 +47,7 @@ hmp_csv_data$date_time <- ymd_hms(paste(hmp_csv_data$date, hmp_csv_data$time))
 head(hmp_csv_data)
 
 # filter off bad begining data
-# hmp_csv_data <-filter(hmp_csv_data, date_time  >= "2022-02-01 18:50:00") 
+hmp_csv_data <-filter(hmp_csv_data, date_time  >= "2022-02-01 18:50:00") 
 #write.csv(hmp_csv_data, "/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/jack_eric.csv")
 
 
@@ -57,7 +58,6 @@ hmp_csv_data$date_time <-ymd_hms(hmp_csv_data$date_time)
 # quick test plot
 theme_set(theme_classic(12))
 ggplot(hmp_csv_data) +
-  geom_line(aes(x = date_time, y = RH), size =.6) + 
   geom_line(aes(x = date_time, y = AirTC_Avg), size =.6, color = "red")
 
 ##########################
