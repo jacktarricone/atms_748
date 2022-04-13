@@ -1,0 +1,338 @@
+---
+title: "ATMS Lab 3A"
+author: "Jack Tarricone, Tiger Group"
+date: '2022-04-12'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Experimental Design
+
+We set out to assemble a homemade weather station and deploy it for a week on the University of Nevada, Reno (UNR) Desert Farming Initiative Experiment Station. The ATMS 748 class was split into two groups, Tiger and Bear, where each group was tasked with testing, designing, coding, deploying, and analyzing weather station data. The goal of this work was to prepare the students to learn the process of collecting and processing meteorologic data.
+
+section with 1 paragraph description of the experiment design
+(what you will be able to show with the data collected based on location, position
+and data acquisition interval).
+
+# Methods
+
+We collected data at 
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width = 7cm]{/Users/jacktarricone/atms_748/atms748_lab3/map.png}
+\caption{Map showing the location of the weather station in the UNR Desert Farming Initiative Experiment Station. This location is just east of the main UNR campus. There is a range of irrgated agriculture in the study area, and there were multiple fields being watered in close proximity to the station. Source: Google Maps}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[width=7cm]{/Users/jacktarricone/atms_748/atms748_lab3/tiger_station.jpeg}
+\caption{Picture of the station after the completion of the setup process. Source: Jack Tarricone}
+\end{figure}
+
+\begin{table}
+\centering
+\caption{Shows the instrument model, serial number, and height of the sesnors used in this study}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Instrument \& Model & Serial Number & Variables & Height AGL (cm) & Power Draw (mA) \\
+\hline
+CS CR1000X & 21491 & Data Logger & NA & 1-55 \\
+\hline
+CS HMP 155A & F4610038 & Temp, RH & 137 & 3 \\
+\hline
+CS Model 107 & 9661 & Temp & 0 & NA \\
+\hline
+CS SR 50A & 3877 & Snow Depth & 98 & 2 \\
+\hline
+Meter ATMOS 22 & 0003881 & Wind speed, direction & 163 & 8 \\
+\hline
+Apogee SN-500-SS & 0-1085 & Net Radiation & 98 & 1.5\\
+\hline
+Setra 278 & 7581892 & Pressure & 81 & 3 \\
+\hline
+HOBO ONSET RG3 & 10560978 & Precipiation & 122 & NA \\ \hline
+\end{tabular}
+\end{table}
+
+# Appendix
+
+CR1000X data logger code used in this study.
+
+```
+'CR1000X Series
+'Instrument 1, temp/relative humidity: HMP-155A
+'Instrument 2: ATMOS22
+'Instrument 3: SR50A
+'Instrument 4: TR-525 Rainfall Sensor 
+'Instrument 5: T107_C
+'Instrument 6: Setra 278v
+'Instrument 7: Apogee 500 4-Component Radiometer
+'Instrument 8: Decagon 5MT
+
+'TEAM TIGER
+'ATMS 748 Lab 6 - Code for all instruments
+'Climate Station Setup
+'--- HMP-155A ------------------------------------------------------------------
+'Yellow          = 1H
+'Blue              = 2H
+'JUMPER      = 1L to 2L
+'Red               = 12V
+'White           = 2L
+'Clear/Black = G
+'--- Setra 278 -----------------------------------------------------------------
+'Blue              = 3L
+'Green             = C5
+'Clear/white  = AG
+'Red               = 12V
+'Black             = G
+'--- CS 107 --------------------------------------------------------------------
+'Black             = VX1
+'Purple/Clear      = AG
+'Red               = 4H
+'--- SR50A ---------------------------------------------------------------------
+'Green             = C3
+'Red               = 12V
+'White/clear/black = G
+'--- Rain Gauge ----------------------------------------------------------------
+'Black             = P1
+'Bare/white        = AG
+'--- ATMOS22 -------------------------------------------------------------------
+'Bare              = G
+'Orange            = C1
+'Brown             = 12V
+'--- Apogee 500 with Serial Numbers range 0 to 1085 ---------------
+'Black             = SDI-12 (Data line)         = C7
+'Red               = Power in (4.5 – 24 vdc) b  = 12V
+'Clear             = Shield Wire (G)            = G
+'--- Decagon 5MT - NOT USING----------------------------------------------------
+'Red               = C8
+'White             = 12V
+'Bare              = AG
+
+
+
+'-------------------------------------------------------------------------------
+'-------------------------------------------------------------------------------
+'-------------------------------------------------------------------------------
+'-------------------------------------------------------------------------------
+'Declare Constants
+'-------------------------------------------------------------------------------
+'-------------------------------------------------------------------------------
+Const Scan_Rate  = 20
+Const Buffer     = 200
+Const TABLE_NAME = "SlowResponse"
+Const TableSize  = 1
+
+
+'-------------------------------------------------------------------------------
+'-------------------------------------------------------------------------------
+' DECLATE VARIABLES AND UNITS --------------------------------------------------
+'-------------------------------------------------------------------------------
+'HMP-155A
+'-------------------------------------------------------------------------------
+Public BattV
+Public PTemp_C
+Public AirTC
+Public RH
+Units BattV=Volts
+Units PTemp_C=Deg C
+Units AirTC=Deg C
+Units RH=%
+'-------------------------------------------------------------------------------
+'ATMOS22
+'-------------------------------------------------------------------------------
+Public ATMOS22(4)
+'M! + D0! command variables
+Alias ATMOS22(1)= windSpeed
+Units windSpeed = m/s
+Alias ATMOS22(2)= windDirection
+Units windDirection = deg
+Alias ATMOS22(3)= gustWindSpeed
+Units gustWindSpeed = m/s
+'M! + D1! command variables
+Alias ATMOS22(4)=AirTemp
+Units AirTemp=degC
+'-------------------------------------------------------------------------------
+'SR50A
+'-------------------------------------------------------------------------------
+Public SR50A(2)
+Public TCDT
+Alias SR50A(1)=DT
+Alias SR50A(2)=Q
+'-------------------------------------------------------------------------------
+'TR-525 Rainfall Sensor 
+'-------------------------------------------------------------------------------
+Public Rain_mm
+Units Rain_mm=mm
+'-------------------------------------------------------------------------------
+'T107_C
+'-------------------------------------------------------------------------------
+Public T107_C
+Units T107_C=Deg C
+'-------------------------------------------------------------------------------
+'---Setra 278v -----------------------------------------------------------------
+Public BP_mbar
+
+Units BP_mbar=mbar
+'-------------------------------------------------------------------------------
+'--- Apogee 500 4 Component Radiometer -----------------------------------------
+
+Public SN500Data1(4)
+Public SN500Data2(2)
+Public SWalbedo
+Public NR
+
+Alias SN500Data1(1)=SWin
+Alias SN500Data1(2)=SWout
+Alias SN500Data1(3)=LWin
+Alias SN500Data1(4)=LWout
+Alias SN500Data2(1)=SWnet
+Alias SN500Data2(2)=LWnet
+'-------------------------------------------------------------------------------
+'--- Decagon 5TM Soil ----------------------------------------------------------
+'Public SensorOut(3)
+'Public VWC
+
+'Alias SensorOut(1) = Eb
+'Alias SensorOut(2) = EC
+'Alias SensorOut(3) = Temp
+
+'Units Temp = Deg_C
+'Units EC = dS/m
+'Units VWC = m^3/m^3
+
+'-------------------------------------------------------------------------------
+'-------------------------------------------------------------------------------
+'-------------------------------------------------------------------------------
+'Define Data Tables
+'-------------------------------------------------------------------------------
+'-------------------------------------------------------------------------------
+DataTable(TABLE_NAME,1,-1)
+	DataInterval(0,1,Min,10)
+	TableFile("CRD:"&Status.SerialNumber(1,1)&".SlowResponse_",64,-1,0,TableSize,Hr,0,0)
+	'-----------------------------------------------------------------------------
+	'---HMP-155A
+	Minimum(1,BattV,FP2,False,False)
+	Sample(1,PTemp_C,FP2)
+	Average(1,AirTC,FP2,False)
+	Sample(1,RH,FP2)
+	'-----------------------------------------------------------------------------
+	'---ATMOS22
+        Sample(1,windSpeed,IEEE4)
+	Sample(1,windDirection,IEEE4)
+	Sample(1,gustWindSpeed,IEEE4)
+	Sample(1,AirTemp,IEEE4)
+	'-----------------------------------------------------------------------------
+	'---SR50A/SR50A-EE Sonic Ranging Sensor (SDI-12 Output) 
+	Average(1,DT,FP2,False)
+	Average(1,Q,FP2,False)
+	Average(1,TCDT,FP2,False)
+	'-----------------------------------------------------------------------------
+	'---TR-525 Rainfall Sensor
+	Totalize(1,Rain_mm,FP2,False)
+	'-----------------------------------------------------------------------------
+	'---T107_C
+	Average(1,T107_C,FP2,False)
+	'-----------------------------------------------------------------------------
+	'---Setra 278 
+  Average(1,BP_mbar,IEEE4,False)
+	'-----------------------------------------------------------------------------
+	'--- Apogee 500 4-component radiometer ---------------------------------------
+        Average(1,BattV,FP2,False)
+        Average(1,PTemp_C,FP2,False)
+        Average(1,SWin,FP2,False)
+        Average(1,SWout,FP2,False)
+        Average(1,LWin,FP2,False)
+        Average(1,LWout,FP2,False)
+        Average(1,SWnet,FP2,False)
+        Average(1,LWnet,FP2,False)
+        Average(1,SWalbedo,FP2,False)
+        Average(1,NR,FP2,False)
+	'-----------------------------------------------------------------------------
+	'--- Decagon 5MT -------------------------------------------------------------
+	'Sample (1,Eb,FP2)
+	'Sample (1,Temp,FP2)
+	'Sample (1,EC,FP2)
+	'Sample (1,VWC,FP2)
+'-------------------------------------------------------------------------------
+EndTable
+
+
+'-------------------------------------------------------------------------------
+'-------------------------------------------------------------------------------
+'-------------------------------------------------------------------------------
+'Main Program
+'-------------------------------------------------------------------------------
+BeginProg
+	'Main Scan
+	Scan(Scan_Rate,Sec,0,0)
+	  '---------------------------------------------------------------------------
+		'---Default CR1000X Datalogger Battery Voltage measurement 'BattV'
+		Battery(BattV)
+		'---------------------------------------------------------------------------
+		'---Default CR1000X Datalogger Wiring Panel Temperature measurement 'PTemp_C'
+		PanelTemp(PTemp_C,60)
+		'---------------------------------------------------------------------------
+		'---HMP-155A (constant power) Temperature & Relative Humidity Sensor measurements 'AirTC' and 'RH'
+                VoltDiff(AirTC,1,mV1000,1,False,0,60,0.14,-80)
+		VoltDiff(RH,1,mV1000,2,False,0,60,0.1,0)
+		If RH>100 AND RH<108 Then RH=100
+		'---------------------------------------------------------------------------
+		'---ATMOS22 ----------------------------------------------------------------
+		SDI12Recorder(ATMOS22(),C1,0,"M!",1.0,0)
+		'---------------------------------------------------------------------------
+		'---SR50A/SR50A-EE Sonic Ranging Sensor (SDI-12 Output) measurements 'DT' and 
+		'---'Q' and calculations 'TCDT' and 'DBTCDT' -------------------------------
+		SDI12Recorder(SR50A(),C3,"0","M1!",1,0,-1)
+		TCDT=DT*SQR((PTemp_C+273.15)/273.15)
+		'---------------------------------------------------------------------------
+		'---TE525/TE525WS Rain Gauge measurement 'Rain_mm' -------------------------
+		PulseCount(Rain_mm,1,P1,1,0,0.254,0)
+		'---------------------------------------------------------------------------
+		'---107 Temperature Probe measurement 'T107_C' -----------------------------
+		Therm107(T107_C,1,7,VX1,0,60,1,0)
+		'---------------------------------------------------------------------------
+		'---Setra 278 --------------------------------------------------------------
+    'CS100 Barometric Pressure Sensor measurement 'BP_mbar'
+    PortSet(C5,1)
+		VoltSe(BP_mbar,1,mV5000,6,True,0,_60Hz,0.2,600)
+		PortSet(C5,0)
+		'Call Data Tables and Store Data
+		'---------------------------------------------------------------------------
+		'--- Apogee 500 4-component radiometer -------------------------------------
+                '--- SN-500S-S Net Radiometer measurements 'SWin', 'SWout', 'LWin', and 'LWout'
+                SDI12Recorder(SN500Data1(),C7,"0","M!",1,0,-1)		
+                '--- SN-500-SS Net Radiometer measurements 'SWnet' and 'LWnet'
+                SDI12Recorder(SN500Data2(),C7,"0","M1!",1,0,-1)		 
+                '--- SN-500-SS Net Radiometer measurement 'SWalbedo'
+                SDI12Recorder(SWalbedo,C7,"0","M4!",1,0)
+                'Calculate Net Radiation 'NR'
+                NR=SWnet+LWnet
+		'---------------------------------------------------------------------------
+		'--- Decagon 5MT -----------------------------------------------------------
+		'Delay for at least 250 mSec for sensor to enter SDI-12 mode.
+		'Delay (0,1,Sec)
+		'Query sensor for 3 SDI-12 outputs.  Default address for all Decagon Digital sensors is 0.
+		'SDI12Recorder (SensorOut(),C8,0,"M!",1.0,0)
+		
+		'Turn SW12V off
+		'PortSet (C3,0)
+		
+		'Apply calibration to bulk dielectric reading (Eb)
+		'VWC = 4.3E-6 * Eb^3 - 5.5E-4 * Eb^2 + 2.92E-2 * Eb - 5.3E-2
+		
+'-------------------------------------------------------------------------------
+'-------------------------------------------------------------------------------
+		'Call Data Tables and Store Data
+		CallTable TABLE_NAME
+	NextScan
+EndProg
+```
+
+
