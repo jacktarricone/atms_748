@@ -1,0 +1,156 @@
+---
+title: "Lab 3b ATMS 748"
+author: "Jack Tarricone"
+date: "4/15/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2);theme_set(theme_classic(12)) 
+library(dplyr) 
+library(lubridate) 
+library(chron)
+library(openair)
+```
+
+```{r}
+
+```
+# Directions
+Lab 3b requirements (due April 19)\
+a. Results section with paragraph description of data (time span, data quality)\
+
+c. Timeseries plot of temperature for 5TM (if you have it), 107, HMP-155, panel
+temperature, sonic temperature all on the same plot (with legend). Comment on
+the plot.\
+d. Timeseries plot of upwelling and downwelling shortwave radiation with legend.
+Comment on the plot.\
+e. Timeseries plot of upwelling and downwelling longwave radiation with legend.
+Comment on the plot.\
+f. Timeseries plot of net radiation. Comment on the plot.\
+g. Timeseries plot of albedo. Comment on the plot.\
+h. Discussion section with 2 paragraphs of data analysis on topics of your choice using
+the data collected.\
+
+
+# Load Data
+Data formatting done in seperate script ```tarricone_lab3_data_qaqc.R", which is attached.
+```{r}
+# read in csvs created in last script
+# read data back in and format date_time back to a date
+tiger_data <-read.csv("/Users/jacktarricone/atms_748/atms748_lab3/tiger_data.csv")
+tiger_data$date_time <-ymd_hms(tiger_data$date_time)
+
+# transform date_time back into a R date
+tiger_data$date <-as.Date(tiger_data$date)
+```
+
+
+### b. Plot of windrose for your wind data. Comment on it.\
+```{r}
+## correct offset of -2
+tiger_data$windDirection <- tiger_data$windDirection -4
+id <- which(tiger_data$windDirection < 0)
+tiger_data$windDirection[id] <- tiger_data$windDirection[id] + 360
+```
+
+```{r fig.height = 6, fig.width = 6, fig.align = "center"}
+# plot using windRose function from openair package
+windRose(tiger_data, ws = "windSpeed", wd = "windDirection", angle = 10, ws.int = 1.5, angle.scale = 45,
+         cols = c("yellow", "blue", "green", "black"), width = 1.5, auto.text = FALSE, paddle = FALSE) 
+
+
+# trim each df down so it has the same date_time range, cutting off the back data in the start
+# g1_filt <-filter(g1, date_time >= ymd_hms("2022-01-25 17:45:00") 
+#                  & date_time <= ymd_hms("2022-02-01 15:45:00"))
+
+```
+### c. Timeseries plot of temperature for 5TM (if you have it), 107, HMP-155, panel
+
+```{r}
+# plot
+ggplot(tiger_data) +
+  geom_line(aes(x = date_time, y = T107_C_Avg, col = "107")) + #107 ground temp
+  geom_line(aes(x = date_time, y = AirTC_Avg, col = "HMP")) + # hmp air temp
+  geom_line(aes(x = date_time, y = PTemp_C, col = "Panel Temp.")) + # panel temp
+  scale_colour_manual(name = "Sensor",values=c("black","goldenrod","firebrick")) +
+  labs(title = "Comparing Different Temperature Sensors") +
+  ylab("Temperature (C)") +
+  xlab("Date") +
+  theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        legend.position = c(.85,.9),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 9, face = "bold"),
+        legend.margin = margin(t=0, unit='cm'),
+        legend.key = element_rect(size = .2))
+```
+**Figure 1.** This plot displays the ensemble average relative humidity (RH) with plus and minus one standard deviation for Groups 1, 2, 4, and 5 between January 25th and February 2nd, 2022. Group 3 was omitted because the data contained significant errors and was not logged correctly. Group 1 & 2 also had errors in their data, with the RH values only unrealistically varying between 35-45%
+
+# 2. Air Temperature 
+
+```{r}
+# create new df with air temp for all 4 groups
+# bind all the groups AT values together
+at_df <-cbind(g1_filt$AirTC_Avg, g2_filt$AirTC_Avg, g4_filt$AirTC_Avg, g5_filt$AirTC_Avg)
+at_df <-as.data.frame(at_df) # convert to df
+date_time <-ymd_hms(g1_filt$date_time) # convert date
+at <-cbind(date_time, at_df) # bind date and data
+colnames(at) <-c("date_time","g1_at", "g2_at","g4_at","g5_at")
+
+# create mean col
+at$mean <-(at$g1_at+at$g2_at+at$g4_at+at$g5_at)/4
+
+# create sd col
+at$sd <-sd(at$mean)
+```
+
+```{r}
+# plot
+ggplot(at) +
+  geom_line(aes(x = date_time, y = mean), col = "red") +
+  geom_ribbon(aes(x = date_time, ymin = mean-sd, ymax = mean+sd, fill = "+/- One Standard Deviation"), alpha=.2)+
+  scale_fill_manual("",values="grey12") +
+  labs(title = "HMP Air Temperature Ensemble Average Jan 25th - Feb 1st 2022") +
+  ylab("Temperature (C)") +
+  xlab("Date") +
+    theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        legend.position = c(.8,.1),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 9, face = "bold"),
+        legend.margin = margin(t=0, unit='cm'),
+        legend.key = element_rect(size = .2))
+```
+**Figure 2.** This plot displays the ensemble average HMP air temperature with plus and minus one standard deviation for Groups 1, 2, 4, and 5 between January 25th and February 2nd, 2022. Similar to RH, Group 3's HMP data was omitted because it was not logged correctly. The variance temperature data was consistent when compared to the RH data.
+
+
+# 3. Wind Rose
+```{r}
+# read in group 3 sonic data csv
+g3 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/jack_eric.csv")
+```
+
+```{r}
+# format date
+g3$date <-ymd_hms(g3$date_time)
+
+## correct offset of -2
+g3$windDirection <- g3$windDirection -2
+id <- which(g3$windDirection < 0)
+g3$windDirection[id] <- g3$windDirection[id] + 360
+```
+
+```{r fig.height = 6, fig.width = 6, fig.align = "center"}
+# plot using windRose function from openair package
+windRose(g3, ws = "windSpeed", wd = "windDirection", angle = 10, ws.int = .5, angle.scale = 45,
+         cols = c("yellow", "blue", "green", "black"), width = 1.5, auto.text = FALSE, paddle = FALSE) 
+```
+**Figure 3.** This wind rose plot shows direction, speed, and frequency of wind events from a 2-D sonic anemometer from February 1st - 8th, 2022 in Reno, NV. The majority of wind speeds were below 1 m/s, while the most common wind directions were from the southeast and northwest.

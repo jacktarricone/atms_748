@@ -2,8 +2,11 @@
 title: "ATMS Lab 3A"
 author: "Jack Tarricone, Tiger Group"
 date: '2022-04-12'
+header-includes:
+   - \usepackage{float}
 output: pdf_document
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -11,31 +14,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Experimental Design
 
-We set out to assemble a homemade weather station and deploy it for a week on the University of Nevada, Reno (UNR) Desert Farming Initiative Experiment Station. The ATMS 748 class was split into two groups, Tiger and Bear, where each group was tasked with testing, designing, coding, deploying, and analyzing weather station data. The goal of this work was to prepare the students to learn the process of collecting and processing meteorologic data.
-
-section with 1 paragraph description of the experiment design
-(what you will be able to show with the data collected based on location, position
-and data acquisition interval).
+We set out to assemble a homemade weather station and deploy it for a week at the University of Nevada, Reno (UNR) Desert Farming Initiative Experiment Station. The ATMS 748 class was split into two groups, Tiger and Bear, where each group was tasked with testing, designing, coding, deploying, and analyzing weather station data. This work aimed to prepare the students to learn the process of collecting and processing meteorologic data. The data was collected at 1-minute intervals between March 29th and April 5th. Due to an error in the data logger code, data was only successfully collected starting March 31st. While the station was only deployed for four days, this station location and measurement interval would be suitable for collecting long-term climate data remotely.
 
 # Methods
 
-We collected data at 
+The station we deployed consisted of seven separate sensors and a data logger. Information on the specific sensor, model, and variables measured is described in Table 1. The sensors measuring air temperature, relative humidity (RH), wind speed, wind direction, barometric pressure, snow depth, ground temperature,  and 4-way net radiation were placed on the main tower with a horizontal boom. The tipping bucket rain gauge, which measures precipitation, was placed on a separate tower two feet to the northeast.
 
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width = 7cm]{/Users/jacktarricone/atms_748/atms748_lab3/map.png}
-\caption{Map showing the location of the weather station in the UNR Desert Farming Initiative Experiment Station. This location is just east of the main UNR campus. There is a range of irrgated agriculture in the study area, and there were multiple fields being watered in close proximity to the station. Source: Google Maps}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[width=7cm]{/Users/jacktarricone/atms_748/atms748_lab3/tiger_station.jpeg}
-\caption{Picture of the station after the completion of the setup process. Source: Jack Tarricone}
-\end{figure}
-
-\begin{table}
+\begin{table}[H]
 \centering
 \caption{Shows the instrument model, serial number, and height of the sesnors used in this study}
 \begin{tabular}{|c|c|c|c|c|}
@@ -59,6 +44,23 @@ Setra 278 & 7581892 & Pressure & 81 & 3 \\
 HOBO ONSET RG3 & 10560978 & Precipiation & 122 & NA \\ \hline
 \end{tabular}
 \end{table}
+
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width = 12cm]{/Users/jacktarricone/atms_748/atms748_lab3/map.png}
+\caption{Map showing the location of the weather station in the UNR Desert Farming Initiative Experiment Station. This location is just east of the main UNR campus. There is a range of irrgated agriculture in the study area, and there were multiple fields being watered in close proximity to the station. Source: Google Maps}
+\end{figure}
+
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=7cm]{/Users/jacktarricone/atms_748/atms748_lab3/tiger_station.jpeg}
+\caption{Picture of the station after the completion of the setup process. The station consisted of who seperate towers, one with the raig gauge, and one with the other seven instruments. Source: Jack Tarricone}
+\end{figure}
+
 
 # Appendix
 
