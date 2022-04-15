@@ -14,18 +14,13 @@ library(chron)
 library(openair)
 ```
 
-```{r}
-
-```
 # Directions
 Lab 3b requirements (due April 19)\
 a. Results section with paragraph description of data (time span, data quality)\
 
-c. Timeseries plot of temperature for 5TM (if you have it), 107, HMP-155, panel
-temperature, sonic temperature all on the same plot (with legend). Comment on
-the plot.\
 d. Timeseries plot of upwelling and downwelling shortwave radiation with legend.
 Comment on the plot.\
+
 e. Timeseries plot of upwelling and downwelling longwave radiation with legend.
 Comment on the plot.\
 f. Timeseries plot of net radiation. Comment on the plot.\
@@ -57,8 +52,10 @@ tiger_data$windDirection[id] <- tiger_data$windDirection[id] + 360
 
 ```{r fig.height = 6, fig.width = 6, fig.align = "center"}
 # plot using windRose function from openair package
-windRose(tiger_data, ws = "windSpeed", wd = "windDirection", angle = 10, ws.int = 1.5, angle.scale = 45,
-         cols = c("yellow", "blue", "green", "black"), width = 1.5, auto.text = FALSE, paddle = FALSE) 
+windRose(tiger_data, ws = "windSpeed", wd = "windDirection", 
+         angle = 10, ws.int = 1.5, angle.scale = 45,
+         cols = c("yellow", "blue", "green", "black"), 
+         width = 1.5, auto.text = FALSE, paddle = FALSE) 
 
 
 # trim each df down so it has the same date_time range, cutting off the back data in the start
@@ -67,15 +64,19 @@ windRose(tiger_data, ws = "windSpeed", wd = "windDirection", angle = 10, ws.int 
 
 ```
 ### c. Timeseries plot of temperature for 5TM (if you have it), 107, HMP-155, panel
+temperature, sonic temperature all on the same plot (with legend)
 
 ```{r}
 # plot
 ggplot(tiger_data) +
-  geom_line(aes(x = date_time, y = T107_C_Avg, col = "107")) + #107 ground temp
-  geom_line(aes(x = date_time, y = AirTC_Avg, col = "HMP")) + # hmp air temp
-  geom_line(aes(x = date_time, y = PTemp_C, col = "Panel Temp.")) + # panel temp
-  scale_colour_manual(name = "Sensor",values=c("black","goldenrod","firebrick")) +
-  labs(title = "Comparing Different Temperature Sensors") +
+  geom_line(aes(x = date_time, y = AirTemp, col = "Atmos-22")) + # panel temp
+  geom_line(aes(x = date_time, y = T107_C_Avg, col = "CS-107")) + #107 ground temp
+  geom_line(aes(x = date_time, y = AirTC_Avg, col = "HMP-155")) + # hmp air temp
+  geom_line(aes(x = date_time, y = PTemp_C, col = "CR100X Panel Temp.")) + # panel temp
+  ylim(c(-10,30))+
+  scale_colour_manual(name = "Sensor",
+                      values=c("goldenrod","black","firebrick","forestgreen")) +
+  labs(title = "Comparing Different Temperature Sensors 4/1 - 4/6/2022") +
   ylab("Temperature (C)") +
   xlab("Date") +
   theme(axis.line = element_line(colour = "black"),
@@ -83,74 +84,99 @@ ggplot(tiger_data) +
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank(),
-        legend.position = c(.85,.9),
-        legend.text = element_text(size = 8),
-        legend.title = element_text(size = 9, face = "bold"),
+        legend.position = c(.85,.23),
+        legend.text = element_text(size = 7),
+        legend.title = element_text(size = 8, face = "bold"),
         legend.margin = margin(t=0, unit='cm'),
-        legend.key = element_rect(size = .2))
+        legend.key = element_rect(size = .1))
 ```
-**Figure 1.** This plot displays the ensemble average relative humidity (RH) with plus and minus one standard deviation for Groups 1, 2, 4, and 5 between January 25th and February 2nd, 2022. Group 3 was omitted because the data contained significant errors and was not logged correctly. Group 1 & 2 also had errors in their data, with the RH values only unrealistically varying between 35-45%
+**Figure 2.** This plot displays temperature measurements for the CS-107, HMP-155, and the CR1000X data logger panel temperature between April 1st and April 6th, 2022. The CS-107 was buried a few centimeters into the top of the soil, while HMP-155, ATMOS-22, panel temperatures are logger changes in air temperature.
 
-# 2. Air Temperature 
-
-```{r}
-# create new df with air temp for all 4 groups
-# bind all the groups AT values together
-at_df <-cbind(g1_filt$AirTC_Avg, g2_filt$AirTC_Avg, g4_filt$AirTC_Avg, g5_filt$AirTC_Avg)
-at_df <-as.data.frame(at_df) # convert to df
-date_time <-ymd_hms(g1_filt$date_time) # convert date
-at <-cbind(date_time, at_df) # bind date and data
-colnames(at) <-c("date_time","g1_at", "g2_at","g4_at","g5_at")
-
-# create mean col
-at$mean <-(at$g1_at+at$g2_at+at$g4_at+at$g5_at)/4
-
-# create sd col
-at$sd <-sd(at$mean)
-```
-
+## d. Timeseries plot of upwelling and downwelling shortwave radiation with legend
 ```{r}
 # plot
-ggplot(at) +
-  geom_line(aes(x = date_time, y = mean), col = "red") +
-  geom_ribbon(aes(x = date_time, ymin = mean-sd, ymax = mean+sd, fill = "+/- One Standard Deviation"), alpha=.2)+
-  scale_fill_manual("",values="grey12") +
-  labs(title = "HMP Air Temperature Ensemble Average Jan 25th - Feb 1st 2022") +
-  ylab("Temperature (C)") +
+ggplot(tiger_data) +
+  geom_line(aes(x = date_time, y = SWin_Avg, col = "SWin")) + 
+  geom_line(aes(x = date_time, y = SWout_Avg, col = "SWout")) + 
+  scale_colour_manual(name = "Energy Flux", 
+                      values=c("slateblue","tomato")) +
+  labs(title = "Incoming and Outgoing SW Radiation 4/1 - 4/6/2022") +
+  ylab("Shortwave Radiation (W/m^2)") +
   xlab("Date") +
-    theme(axis.line = element_line(colour = "black"),
+  theme(axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank(),
-        legend.position = c(.8,.1),
-        legend.text = element_text(size = 8),
-        legend.title = element_text(size = 9, face = "bold"),
+        legend.position = c(.85,.95),
+        legend.text = element_text(size = 7),
+        legend.title = element_text(size = 8, face = "bold"),
         legend.margin = margin(t=0, unit='cm'),
-        legend.key = element_rect(size = .2))
+        legend.key = element_rect(size = .1))
 ```
-**Figure 2.** This plot displays the ensemble average HMP air temperature with plus and minus one standard deviation for Groups 1, 2, 4, and 5 between January 25th and February 2nd, 2022. Similar to RH, Group 3's HMP data was omitted because it was not logged correctly. The variance temperature data was consistent when compared to the RH data.
+**Figure 3.** Comparison between incoming and outgoing SW radiation at the Tiger met station. Incoming SW is substantially higher than out going, which makes sense from the low albedo bare soil below the radiometer. Variability in the data is caused by cloud cover absorbing incoming radiation, with April 2nd being a completely cloud free day.
 
 
-# 3. Wind Rose
-```{r}
-# read in group 3 sonic data csv
-g3 <-read.csv("/Users/jacktarricone/atms_748/data-code/lab2_data/csvs/jack_eric.csv")
-```
+## e. Timeseries plot of upwelling and downwelling longwave radiation with legend
 
 ```{r}
-# format date
-g3$date <-ymd_hms(g3$date_time)
-
-## correct offset of -2
-g3$windDirection <- g3$windDirection -2
-id <- which(g3$windDirection < 0)
-g3$windDirection[id] <- g3$windDirection[id] + 360
+# plot
+ggplot(tiger_data) +
+  geom_line(aes(x = date_time, y = LWin_Avg, col = "LWin")) + # panel temp
+  geom_line(aes(x = date_time, y = LWout_Avg, col = "LWout")) + #107 ground temp
+  scale_colour_manual(name = "Energy Flux",
+                      values=c("cornsilk4","maroon4")) +
+  labs(title = "Incoming and Outgoing LW Radiation 4/1 - 4/6/2022") +
+  ylab("Lonwave Radiation (W/m^2)") +
+  xlab("Date") +
+  theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        legend.position = c(.85,.95),
+        legend.text = element_text(size = 7),
+        legend.title = element_text(size = 8, face = "bold"),
+        legend.margin = margin(t=0, unit='cm'),
+        legend.key = element_rect(size = .1))
 ```
+**Figure 4.** Comparison between incoming and outgoing LW radiation at the Tiger met station. ***MORE***
 
-```{r fig.height = 6, fig.width = 6, fig.align = "center"}
-# plot using windRose function from openair package
-windRose(g3, ws = "windSpeed", wd = "windDirection", angle = 10, ws.int = .5, angle.scale = 45,
-         cols = c("yellow", "blue", "green", "black"), width = 1.5, auto.text = FALSE, paddle = FALSE) 
+## f. Timeseries plot of net radiation
+```{r}
+# calculate net radiation
+tiger_data$net_rad <-tiger_data$SWnet_Avg+tiger_data$LWnet_Avg
+
+# plot
+ggplot(tiger_data) +
+  geom_line(aes(x = date_time, y = net_rad), col = "darkorchid4") + 
+  labs(title = "Net Radiation 4/1 - 4/6/2022") +
+  ylab("Net Radiation (W/m^2)") +
+  xlab("Date")
 ```
-**Figure 3.** This wind rose plot shows direction, speed, and frequency of wind events from a 2-D sonic anemometer from February 1st - 8th, 2022 in Reno, NV. The majority of wind speeds were below 1 m/s, while the most common wind directions were from the southeast and northwest.
+**Figure 5.** Comparison between incoming and outgoing LW radiation at the Tiger met station. ***MORE***
+
+## Timeseries plot of albedo.
+```{r}
+# calculate net radiation
+tiger_data$albedo <-(tiger_data$SWout_Avg)/tiger_data$SWin_Avg
+tiger_data$time <-hms(tiger_data$time)
+
+# filter out low values which are a night when there is no solar
+filt <-filter(tiger_data, albedo > .25)
+
+# plot
+ggplot(filt) +
+  geom_line(aes(x = date_time, y = albedo)) + # panel temp
+  ylim(c(0,1))+
+  labs(title = "Albedo 4/1 - 4/6/2022") +
+  ylab("Albedo") +
+  xlab("Date") 
+
+```
+**Figure 6.**  ***MORE***
+
+
+## h. Discussion section with 2 paragraphs of data analysis on topics of your choice using
+the data collected.
+
